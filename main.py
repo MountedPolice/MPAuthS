@@ -36,8 +36,8 @@ class server:
             server_socket.listen(LISTEN)
             while pony:
                 client_socket, addr = server_socket.accept()
-                data = client_socket.recv(BUFFER_SIZE)  # format LICENCE-USER-APP or TYPE-USER-APP
-                data = data.decode("UTF-8")
+                data = client_socket.recv(BUFFER_SIZE)
+                data = data.decode("UTF-8")         # format LICENCE-USER-APP or TYPE-USER-PASSW
                 lprint("Connection established with message " + data)
                 data = data.split('-')
                 if data[0] == 'LICENCE':
