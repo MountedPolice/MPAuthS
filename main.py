@@ -90,8 +90,6 @@ class server:
         except AttributeError:
             lprint("Cant send message")
 
-a = 1
-
 class dbClient:
 
     def __init__(self, host, port, database, user, password):
