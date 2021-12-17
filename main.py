@@ -44,8 +44,14 @@ class server:
                     threading.Thread(target=self._licenser, args=(client_socket, data[1], data[2])).start()
                 elif data[0] == 'AUTH':
                     lprint('AUTH')
+                    client_socket.close()
                 elif data[0] == 'REG':
                     lprint('REG')
+                    client_socket.close()
+                else:
+                    lprint('ошибка запроса')
+                    self._send(client_socket, 'NO')
+                    client_socket.close()
             server_socket.close()
         except socket.error:
             lprint('Could not start server thread')
@@ -91,7 +97,6 @@ class server:
             lprint("Cant send message")
 
 class dbClient:
-
     def __init__(self, host, port, database, user, password):
         self.host = host
         self.port = port
