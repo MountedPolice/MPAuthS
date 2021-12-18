@@ -37,7 +37,7 @@ class server:
             while pony:
                 client_socket, addr = server_socket.accept()
                 data = client_socket.recv(BUFFER_SIZE)
-                data = data.decode("UTF-8")         # format LICENCE-USER-APP or TYPE-USER-PASSW
+                data = data.decode("UTF-8")  # format LICENCE-USER-APP or TYPE-USER-PASSW
                 lprint("Connection established with message " + data)
                 data = data.split('-')
                 if data[0] == 'LICENCE':
@@ -68,8 +68,14 @@ class server:
                     lprint('Data : ' + str(data.decode("UTF-8")) + "\n")
         except socket.error:
             lprint('Client disconnected')
-            self.CLIENTS.remove(client_socket)
-            client_socket.close()
+            try:
+                client_socket.close()
+            except:
+                lprint('MAYBE U SHOULDNT CLOSE HERE?')
+            try:
+                self.CLIENTS.remove(client_socket)
+            except:
+                lprint('ALL BAD CALL MOUNTED POLICE NOW')
             sys.exit()
 
     def broadcast(self):
@@ -79,12 +85,15 @@ class server:
                 self._send(sock, "OK")
             except socket.error:
                 sock.close()
-                self.CLIENTS.remove(sock)
+                try:
+                    self.CLIENTS.remove(sock)
+                except:
+                    lprint('ALL BAD CALL MOUNTED POLICE NOW')
 
     def _licenser(self, socket, user, app):
         if self.db.get_licence(user, app):
             self.CLIENTS.append(socket)
-            threading.Thread(target=self.client_handler, args=(socket, )).start()
+            threading.Thread(target=self.client_handler, args=(socket,)).start()
         else:
             self._send(socket, 'NO')
         sys.exit()
@@ -95,6 +104,7 @@ class server:
             sock.send(message)
         except AttributeError:
             lprint("Cant send message")
+
 
 class dbClient:
     def __init__(self, host, port, database, user, password):
@@ -134,7 +144,6 @@ class dbClient:
             return []
 
 
-
 def lprint(message):
     print(time.asctime() + ' ' + str(message))
 
@@ -148,4 +157,4 @@ if __name__ == '__main__':
         try:
             time.sleep(SLEEP_TIME)
         except:
-            pass
+            sys.exit()
