@@ -118,6 +118,8 @@ class dbClient:
         lprint(username + " Checking the user license for application " + app)
         tab = self._select_fetchall('User')
         for i in tab:
+            if i[3] is None:
+                continue
             if i[1] == username and (app in i[3]):
                 lprint("License ok")
                 return True
