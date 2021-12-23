@@ -17,11 +17,11 @@ BUFFER_SIZE = 1024
 LISTEN = 20
 
 # MySQL SET
-MYSQL_IP = 'localhosy'
-MYSQL_PORT = "2417"
+MYSQL_IP = 'localhost'
+MYSQL_PORT = "3606"
 DATABASE = 'MainCALCDB'
-MYSQL_USER = 'ssapp'
-MYSQL_PASS = 'pass'
+MYSQL_USER = 'root'
+MYSQL_PASS = '123456'
 
 
 class server:
@@ -95,6 +95,7 @@ class server:
         if self.db.get_licence(user, app):
             self.CLIENTS.append(sock)
             threading.Thread(target=self.client_handler, args=(sock,)).start()
+            self.db.add_log_line(user, app)
         else:
             self._send(sock, 'NO')
         sys.exit()
@@ -132,6 +133,33 @@ class dbClient:
         self.database = database
         self.user = user
         self.password = password
+
+    def add_log_line(self, user, app):
+        try:
+            print('log enter')
+            conn = mysql.connector.connect(host=self.host,
+                                           port=self.port,
+                                           database=self.database,
+                                           user=self.user,
+                                           password=self.password)
+            curs = conn.cursor()
+            curs.execute("INSERT INTO `MainCALCDB`.`Action` (`Operation`) VALUES ('Enter" + app + "');")
+            conn.commit()
+            curs.execute("SELECT idAction FROM MainCALCDB.Action ORDER BY idAction DESC LIMIT 1;")
+            freeid = curs.fetchall()
+            freeid = freeid[0][0]
+            curs.execute("SELECT idUser FROM MainCALCDB.User WHERE (`Username` = '" + user + "');")
+            userid = (curs.fetchall())
+            userid = userid[0][0]
+            curs.execute("INSERT INTO `MainCALCDB`.`Actions` (`Date`, `UserID`, `ActionID`) VALUES (NOW"
+                         "(), '" + str(userid)+"', '" + str(freeid)+"');")
+            conn.commit()
+            curs.close()
+            conn.disconnect()
+        except mysql.connector.errors.InterfaceError:
+            print('DB connection error')
+        except mysql.connector.errors.InterfaceError:
+            print('unex')
 
     def get_auth(self, username, password):
         lprint("Auth " + username + " with pass " + password)
